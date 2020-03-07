@@ -8,6 +8,16 @@ import java.time.Instant;
 
 import edu.ucsd.cs.SlowDownloader.DownloadedFile;
 
+// xmlparsering import
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+// xmlparsering import
+
 public final class DashClient {
 
     private Instant startTime;
@@ -29,6 +39,49 @@ public final class DashClient {
 
             // Step 2: Parse the spec and pull out the URLs for each chunk at the 5 quality levels
             // How to do this was covered during the Feb 24th TA section
+	    
+	    File fXmlFile = new File(args[0]);
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(fXmlFile);
+            doc.getDocumentElement().normalize();
+
+            assert(doc.getDocumentElement().getNodeName() == "MPD");
+
+            NodeList repList = doc.getElementsByTagName("Representation");
+            for (int repnum = 0; repnum < repList.getLength(); repnum++) {
+
+                Node rNode = repList.item(repnum);
+                assert(rNode.getNodeName() == "Representation");
+                assert(rNode.getNodeType() == Node.ELEMENT_NODE);
+                
+                Element representation = (Element) rNode;
+                System.out.println("Representation " + repnum + " Bandwidth: " + representation.getAttribute("bandwidth"));
+
+                NodeList segmentlists = rNode.getChildNodes();
+                for (int i = 0; i < segmentlists.getLength(); i++) {
+                    Node segmentlist = segmentlists.item(i);
+
+                    if (segmentlist.getNodeType() == Node.ELEMENT_NODE) {
+                        System.out.println("  " + segmentlist.getNodeName());
+
+                        NodeList segments = segmentlist.getChildNodes();
+                        for (int j = 0; j < segments.getLength(); j++) {
+                            Node segmentNode = segments.item(j);
+
+                            if (segmentNode.getNodeType() == Node.ELEMENT_NODE) {
+                                Element segment = (Element) segmentNode;
+                                if (segment.getNodeName() == "Initialization") {
+                                    System.out.println("    init: " + segment.getAttribute("sourceURL"));
+                                } else {
+                                    System.out.println("    m4s: " + segment.getAttribute("media"));
+                                }
+                            }
+                        }
+                    }
+                }
+            }	
+	
 
             // Step 3: For a movie with C chunks, download chunks 1, 2, ... up to C at a given quality level
 			int C = 79; // get the actual number from the mpd file
@@ -53,6 +106,8 @@ public final class DashClient {
             System.err.println("Error downloading file");
             System.err.println(e.toString());
             System.exit(1);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
