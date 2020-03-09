@@ -40,7 +40,7 @@ class DownloadReport:
 		self.chunk_count = 0
 
 		# Buffering related stats
-		self.initial_buffer = 0
+		self.initial_buffer_time = 0
 		self.buffer_count = 0
 		self.buffer_stats = []
 
@@ -99,32 +99,36 @@ class DownloadReport:
 
 	def compute_statistics(self):
 		prev_event_time = self.start_time
+		prev_buffer_time = self.start_time
+		prev_buffer_chunk = 0
 
 		for event in self.event_list:
 
 			# If things going smoothly from start to end, we compute buffering based
 			# on starting time. If there's buffering event in the middle, we compute
-			# the buffering time in respect to the previous event
-			buffer_elapse = \
-			min(event['timeoffset'] - prev_event_time - CHUNK_TIME, 
-				(event['timeoffset'] - self.start_time) - ((event['chunk_num'] - 1) * CHUNK_TIME))
+			# the buffering time in respect to the previous buffering event
+			buffer_elapse = event['timeoffset'] - (prev_buffer_time + (event['chunk_num'] - prev_buffer_chunk) * CHUNK_TIME)
+
 
 			is_buffer = True if buffer_elapse > 0 else False
 
 			# For initial buffering stat only
 			if prev_event_time == self.start_time:
-				self.initial_buffer = event['timeoffset'] - prev_event_time
-			else:
+				self.initial_buffer_time = event['timeoffset'] - prev_event_time
+				prev_buffer_time = event['timeoffset']
+				prev_buffer_chunk = event['chunk_num']
 
+			else:
 				# For following buffering event, gather the chunk that was buffered and
 				# the buffering time elapse
 				if is_buffer:
 					self.buffer_count += 1
 					self.buffer_stats.append([event['chunk_num'], buffer_elapse])
+					prev_buffer_time = event['timeoffset']
+					prev_buffer_chunk = event['chunk_num']
 
 			# Add to the quality sum
 			self.quality_sum += event['chunk_quality']
-
 			prev_event_time = event['timeoffset']
 
 
@@ -134,10 +138,10 @@ class DownloadReport:
 		print('Average Quality: {}'.format(self.quality_sum/self.chunk_count))
 
 		# Iterate through the buffering event and compute the buffering statistics
-		print('Initial Buffering: {}'.format(self.initial_buffer))
-		print('Buffer occured {} times'.format(self.buffer_count))
+		print('Initial Buffering: {}'.format(self.initial_buffer_time))
+		print('Buffering event occured {} times'.format(self.buffer_count))
 		for index, buffer_event in enumerate(self.buffer_stats):
-			print('\tOccurance {} at Chunk {}, buffer for {} ms'.format( 
+			print('\tOccurance {} at Chunk {}, buffered for {} ms'.format( 
 				index + 1, buffer_event[BUFFER_CHUNK_IDX], buffer_event[BUFFER_SPAN_IDX]))
 
 import sys

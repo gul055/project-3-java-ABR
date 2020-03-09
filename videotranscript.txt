@@ -1,0 +1,4 @@
+Sun Mar 08 04:35:03 PDT 2020,39,Starting VideoTarget
+Sun Mar 08 04:35:03 PDT 2020,46,chunk_num: 1,chunk_quality: 5,chunk_len: 4096,chunk_hash: ff699c988bd07a9b4a548cf90744f5b2e53aeab6b977b3c424a37578dc59657c
+Sun Mar 08 04:35:05 PDT 2020,1551,chunk_num: 2,chunk_quality: 3,chunk_len: 4096,chunk_hash: 1f7423f220edbe227cbd40cb96d45fdbaf248382e6c96df8f57ae989033ff093
+Sun Mar 08 04:35:07 PDT 2020,3858,chunk_num: 3,chunk_quality: 3,chunk_len: 4096,chunk_hash: a82dc72a6ee876f3ad554a1c8eff2dd330b4263187ec50486edb9880007c3145
