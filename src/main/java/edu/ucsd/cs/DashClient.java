@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 import edu.ucsd.cs.SlowDownloader.DownloadedFile;
 
@@ -64,11 +66,12 @@ public final class DashClient {
 
             // Step 2: Parse the spec and pull out the URLs for each chunk at the 5 quality levels
             // How to do this was covered during the Feb 24th TA section
-	    
-	        File fXmlFile = new File(spec);
+	    try {
+	    //File fXmlFile = new File(spec);
+	    InputStream stream = new ByteArrayInputStream(spec.getBytes(StandardCharsets.UTF_8));
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fXmlFile);
+            Document doc = dBuilder.parse(stream);
             doc.getDocumentElement().normalize();
 
             assert(doc.getDocumentElement().getNodeName() == "MPD");
@@ -113,7 +116,9 @@ public final class DashClient {
                 }
                 segTable.put(bw, segList);
             }	
-	
+	    }	catch (Exception e) {
+		    System.out.println(e);
+	    }	
             
             // Step 3: For a movie with C chunks, download chunks 1, 2, ... up to C at a given quality level
             int q = 1;
@@ -144,7 +149,7 @@ public final class DashClient {
                 if (initialBufferTime <= 0) {
                     break;
                 }
-                chunkurl = new URL(seglists.get(i));
+                chunkurl = new URL("http://ec2-54-184-118-202.us-west-2.compute.amazonaws.com/testHtml/" +  seglists.get(i));
                 sTime = System.nanoTime();
                 chunk = httpclient.slowGetURL(chunkurl);
                 eTime = System.nanoTime();
@@ -155,18 +160,18 @@ public final class DashClient {
                 deliverLists.add(chunk.contents);
 
                 chunkSize = chunk.contents.length;
-                currBandWidth = chunkSize/durationInSec;
-                avgBandWidth += currBandWidth;
+               // currBandWidth = chunkSize/durationInSec;
+               // avgBandWidth += currBandWidth;
             }
 
-            double estBandWidth = avgBandWidth / deliverLists.size();
+            //double estBandWidth = avgBandWidth / deliverLists.size();
 
-            for(int i = 0; i <= deliverLists.size(); i++) {
+            for(int i = 0; i < deliverLists.size(); i++) {
                 target.deliver(i, q, deliverLists.get(i));
             }
 
             //start to download rest of chunks and deliver
-            for (int i = deliverLists.size()+1; i <= chunkNum; i++) {
+            for (int i = deliverLists.size(); i < chunkNum; i++) {
                 // Step 3a: Choose a quality level for chunk i
                 q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
                 //depend on bandwidth???
@@ -175,14 +180,14 @@ public final class DashClient {
                 quality = bandwidthTable.get(q);
                 System.out.println("I am trying to download chunk");
                 //need to parse?
-                chunkurl = new URL("http://ec2-54-187-155-109.us-west-2.compute.amazonaws.com/caminandes/" + segTable.get(quality).get(i));
+                chunkurl = new URL("http://ec2-54-184-118-202.us-west-2.compute.amazonaws.com/testHtml/" + segTable.get(quality).get(i));
                 sTime = System.nanoTime();
                 chunk = httpclient.slowGetURL(chunkurl);
                 eTime = System.nanoTime();
 
                 durationInSec = TimeUnit.NANOSECONDS.toSeconds(eTime - sTime);
                 chunkSize = chunk.contents.length;
-                currBandWidth = chunkSize/durationInSec;
+               // currBandWidth = chunkSize/durationInSec;
 
                 // Step 3b: Deliver the chunk to the logger module
                 // Note you might want to buffer the first few chunks to prevent
