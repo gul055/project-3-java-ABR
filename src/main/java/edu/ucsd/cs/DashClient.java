@@ -47,8 +47,8 @@ public final class DashClient {
     private long currBandWidth;
     
     
-    private Hashtable<String, ArrayList<String>> segTable= new Hashtable<>();
-    private ArrayList<String> bandwidthTable = new ArrayList<>();
+    private Hashtable<Integer, ArrayList<String>> segTable= new Hashtable<>();
+    private ArrayList<Integer> bandwidthTable = new ArrayList<>();
     private ArrayList<byte[]> deliverLists = new ArrayList<>();
 
     public DashClient(File bwspec, String transcript) {
@@ -100,7 +100,7 @@ public final class DashClient {
                 String bw = new String(representation.getAttribute("bandwidth"));
                 //System.out.println("Representation " + repnum + " Bandwidth: " + bw);
 
-                bandwidthTable.add(bw);
+                bandwidthTable.add(Integer.parseInt(bw));
 
                 NodeList segmentlists = rNode.getChildNodes();
                 segList = new ArrayList<>();
@@ -127,11 +127,11 @@ public final class DashClient {
                         }
                     }
                 }
-                segTable.put(bw, segList);
+                segTable.put(Integer.parseInt(bw), segList);
             }
 
             //System.out.println(segTable.toString());
-            //Collections.sort(bandwidthTable);
+            Collections.sort(bandwidthTable);
             for (int i = 0; i < bandwidthTable.size(); i++) {
                 System.out.println("quality: " + (i+1) + " bandwidth: " + bandwidthTable.get(i));
             }
@@ -160,7 +160,7 @@ public final class DashClient {
             //no sure how many chunks need to download in rebuffering events
 
             //first few segs
-            for (int i = 0; i < chunkNum-1; i++) {
+            for (int i = 0; i < chunkNum; i++) {
                 if (initialBufferTime < 2000) {
                     break;
                 }
@@ -196,13 +196,13 @@ public final class DashClient {
             q = 3; //default quality
             //start to download rest of chunks and deliver
             System.out.println("size to delivery: " + deliverLists.size());
-            for (int i = deliverLists.size(); i < chunkNum-1; i++) {
+            for (int i = deliverLists.size(); i < chunkNum; i++) {
                 // Step 3a: Choose a quality level for chunk i
                 //q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
                 //depend on bandwidth???
 
                 // Step 3b: Download chunk i at quality level q
-                String quality = bandwidthTable.get(q-1);
+                int quality = bandwidthTable.get(q-1);
                 System.out.println("I am trying to download chunk: " + i + " with quality: " + q + " bandwidth: " + quality);
                 //need to parse?
                 chunkurl = new URL(segTable.get(quality).get(i));
