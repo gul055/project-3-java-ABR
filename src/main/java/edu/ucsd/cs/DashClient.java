@@ -184,6 +184,7 @@ public final class DashClient {
 
             for(int i = 0; i < deliverLists.size(); i++) {
                 target.deliver(i, q, deliverLists.get(i));
+                System.out.println("Delivering chunk Num: " + i);
             }
 
             //start to download rest of chunks and deliver
@@ -194,7 +195,7 @@ public final class DashClient {
 
                 // Step 3b: Download chunk i at quality level q
                 int quality = bandwidthTable.get(q-1);
-                System.out.println("I am trying to download chunk");
+                System.out.println("I am trying to download chunk: " + i);
                 //need to parse?
                 chunkurl = new URL(segTable.get(quality).get(i));
                 sTime = System.nanoTime();
@@ -212,7 +213,7 @@ public final class DashClient {
                 // buffering events if happened, how many chunks need to be rebufferred?
                 target.deliver(i, q, chunk.contents);
                 
-                if (durationInMs > 2000 && currBandWidth * 1000 < (long) quality) {
+                if (durationInMs > 2000) {
                     if (q > 1) {
                         q -= 1;
                     } else {
