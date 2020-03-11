@@ -48,7 +48,6 @@ public final class DashClient {
     
     private Hashtable<Integer, ArrayList<String>> segTable= new Hashtable<>();
     private ArrayList<Integer> bandwidthTable = new ArrayList<>();
-    //private Hashtable<Integer, String> bandwidthTable = new Hashtable<>();
     private ArrayList<byte[]> deliverLists = new ArrayList<>();
 
     public DashClient(File bwspec, String transcript) {
@@ -64,9 +63,15 @@ public final class DashClient {
             URL urlLink = new URL(mpdurl);
             String urlLinkString = urlLink.toString();
             urlLinkString = urlLinkString.substring(0, urlLinkString.lastIndexOf('/')+1);
-            System.out.println("urlLinkString: " + urlLinkString);
+            //System.out.println("urlLinkString: " + urlLinkString);
 
+            sTime = System.nanoTime();
             DownloadedFile specfile = httpclient.slowGetURL(urlLink);
+            eTime = System.nanoTime();
+
+            durationInMs = TimeUnit.NANOSECONDS.toMillis(eTime - sTime);
+
+
             String spec = new String(specfile.contents);
 
             // Step 2: Parse the spec and pull out the URLs for each chunk at the 5 quality levels
@@ -92,7 +97,7 @@ public final class DashClient {
                 
                 Element representation = (Element) rNode;
                 String bw = new String(representation.getAttribute("bandwidth"));
-                System.out.println("Representation " + repnum + " Bandwidth: " + bw);
+                //System.out.println("Representation " + repnum + " Bandwidth: " + bw);
 
                 bandwidthTable.add(Integer.parseInt(bw));
 
@@ -102,7 +107,7 @@ public final class DashClient {
                     Node segmentlist = segmentlists.item(i);
 
                     if (segmentlist.getNodeType() == Node.ELEMENT_NODE) {
-                        System.out.println("  " + segmentlist.getNodeName());
+                        //System.out.println("  " + segmentlist.getNodeName());
 
                         NodeList segments = segmentlist.getChildNodes();
                         for (int j = 0; j < segments.getLength(); j++) {
@@ -112,10 +117,10 @@ public final class DashClient {
                                 Element segment = (Element) segmentNode;
                                 if (segment.getNodeName() == "Initialization") {
                                     segList.add(urlLinkString + segment.getAttribute("sourceURL"));
-                                    System.out.println("    init: " + urlLinkString + segment.getAttribute("sourceURL"));
+                                    //System.out.println("    init: " + urlLinkString + segment.getAttribute("sourceURL"));
                                 } else {
                                     segList.add(urlLinkString + segment.getAttribute("media"));
-                                    System.out.println("    m4s: " + urlLinkString + segment.getAttribute("media"));
+                                    //System.out.println("    m4s: " + urlLinkString + segment.getAttribute("media"));
                                 }
                             }
                         }
@@ -126,7 +131,7 @@ public final class DashClient {
             
             Collections.sort(bandwidthTable);
             for (int i = 0; i < bandwidthTable.size(); i++) {
-                System.out.println("quality: " + (i+1) + "bandwidth: " + bandwidthTable.get(i));
+                System.out.println("quality: " + (i+1) + " bandwidth: " + bandwidthTable.get(i));
             }
 
             // Step 3: For a movie with C chunks, download chunks 1, 2, ... up to C at a given quality level
@@ -145,13 +150,15 @@ public final class DashClient {
                 System.exit(1);
             }
                 
+            initialBufferTime -= durationInMs; //mpd download time
+
             //Time to first frame
             //no sure if I need more chunk to determine bandwidth
             //no sure how many chunks need to download in rebuffering events
 
             //first few segs
             for (int i = 0; i <= chunkNum; i++) {
-                if (initialBufferTime <= 0) {
+                if (initialBufferTime < 2000) {
                     break;
                 }
                 chunkurl = new URL(seglists.get(i));
@@ -196,25 +203,26 @@ public final class DashClient {
 
                 durationInMs = TimeUnit.NANOSECONDS.toSeconds(eTime - sTime);
                 chunkSize = chunk.contents.length;
-               // currBandWidth = chunkSize/durationInSec;
+                currBandWidth = chunkSize/durationInMs;
+                System.out.println("currBandWidth: " + currBandWidth);
+
 
                 // Step 3b: Deliver the chunk to the logger module
                 // Note you might want to buffer the first few chunks to prevent
                 // buffering events if happened, how many chunks need to be rebufferred?
                 target.deliver(i, q, chunk.contents);
-                /*
-                if (durationInSec > 2000) {
+                
+                if (durationInMs > 2000 && currBandWidth * 1000 < (long) quality) {
                     if (q > 1) {
                         q -= 1;
                     } else {
                         q = 1;
                     }
-                } else if (durationInSec < 2000) {
+                } else if (durationInMs <= 2000) {
                     if (q < 5) {
                         q += 1;
                     }
                 }
-                */
             }
         } catch (MalformedURLException e) {
             System.err.println("Error with the URL");
