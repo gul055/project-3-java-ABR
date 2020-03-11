@@ -190,9 +190,9 @@ public final class DashClient {
                 System.out.println("Delivering chunk Num: " + i);
             }
 
-            q = 3; //default quality
+            q = 1; //default quality
             //start to download rest of chunks and deliver
-            for (int i = deliverLists.size(); i < chunkNum; i++) {
+            for (int i = deliverLists.size(); i < chunkNum-1; i++) {
                 // Step 3a: Choose a quality level for chunk i
                 //q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
                 //depend on bandwidth???
@@ -202,6 +202,7 @@ public final class DashClient {
                 System.out.println("I am trying to download chunk: " + i + " with quality: " + q);
                 //need to parse?
                 chunkurl = new URL(segTable.get(quality).get(i));
+                System.out.println("ulr: " + chunkurl.toString());
                 sTime = System.nanoTime();
                 chunk = httpclient.slowGetURL(chunkurl);
                 eTime = System.nanoTime();
