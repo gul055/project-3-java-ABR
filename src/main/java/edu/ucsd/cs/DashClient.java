@@ -129,8 +129,9 @@ public final class DashClient {
                 }
                 segTable.put(bw, segList);
             }
-            
-            Collections.sort(bandwidthTable);
+
+            System.out.println(segTable.toString());
+            //Collections.sort(bandwidthTable);
             for (int i = 0; i < bandwidthTable.size(); i++) {
                 System.out.println("quality: " + (i+1) + " bandwidth: " + bandwidthTable.get(i));
             }
