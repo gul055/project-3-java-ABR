@@ -39,6 +39,7 @@ public final class DashClient {
     private URL chunkurl;
     private long sTime;
     private long eTime;
+    private long totalBufferTime;
     private DownloadedFile chunk;
 
     private long durationInMs;
@@ -151,6 +152,7 @@ public final class DashClient {
             }
                 
             initialBufferTime -= durationInMs; //mpd download time
+            totalBufferTime += durationInMs;
 
             //Time to first frame
             //no sure if I need more chunk to determine bandwidth
@@ -176,6 +178,7 @@ public final class DashClient {
                 System.out.println("chunkSize: " + chunkSize + " durationInMs: " + durationInMs + " currBandWidth: " + currBandWidth 
                 + " sumBandWidth " + sumBandWidth);
                 initialBufferTime -= durationInMs;
+                totalBufferTime += durationInMs;
                 System.out.println("initialBufferTime: " + initialBufferTime);
             }
 
@@ -187,15 +190,16 @@ public final class DashClient {
                 System.out.println("Delivering chunk Num: " + i);
             }
 
+            q = 3; //default quality
             //start to download rest of chunks and deliver
             for (int i = deliverLists.size(); i < chunkNum; i++) {
                 // Step 3a: Choose a quality level for chunk i
-                q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
+                //q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
                 //depend on bandwidth???
 
                 // Step 3b: Download chunk i at quality level q
                 int quality = bandwidthTable.get(q-1);
-                System.out.println("I am trying to download chunk: " + i);
+                System.out.println("I am trying to download chunk: " + i + " with quality: " + q);
                 //need to parse?
                 chunkurl = new URL(segTable.get(quality).get(i));
                 sTime = System.nanoTime();
@@ -212,8 +216,8 @@ public final class DashClient {
                 // Note you might want to buffer the first few chunks to prevent
                 // buffering events if happened, how many chunks need to be rebufferred?
                 target.deliver(i, q, chunk.contents);
-                
-                if (durationInMs > 2000) {
+                totalBufferTime = totalBufferTime - durationInMs + 2000;
+                if (durationInMs > 2000 && totalBufferTime < 2000) {
                     if (q > 1) {
                         q -= 1;
                     } else {
