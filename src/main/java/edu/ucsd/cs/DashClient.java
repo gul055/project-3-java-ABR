@@ -139,14 +139,14 @@ public final class DashClient {
             }
 
             // Step 3: For a movie with C chunks, download chunks 1, 2, ... up to C at a given quality level
-            int q = 3; // default quality
+            int q = 1; // default quality
             ArrayList<String> seglists = new ArrayList<>();
 
             if (segTable.containsKey(bandwidthTable.get(q-1))) {
                 seglists = segTable.get(bandwidthTable.get(q-1));
                 chunkNum = seglists.size(); // get the actual number from the mpd file
                 videoLength = 2000 * chunkNum; //in milliseconds
-                initialBufferTime = videoLength * 0.15; //can be changed
+                initialBufferTime = videoLength * 0.18; //can be changed
                 bufferTimeLen = videoLength * 0.05;
 
                 System.out.println("chunkNum: " + chunkNum + " videoLength: " + videoLength + " initialBufferTime: " + initialBufferTime);
@@ -164,10 +164,15 @@ public final class DashClient {
 
             //first few segs
             for (int i = 0; i < chunkNum; i++) {
-                if (initialBufferTime < 2000 || totalBufferTime >= 6000) {
+                if (initialBufferTime < 2000) {
                     break;
                 }
-                chunkurl = new URL(seglists.get(i));
+		if ( i > 3 ) {
+			if (q < 5) {
+				q += 1;
+			}
+		}
+                chunkurl = new URL(segTable.get(bandwidthTable.get(q-1)).get(i));
                 System.out.println("ulr: " + chunkurl.toString());
 
                 sTime = System.nanoTime();
@@ -196,7 +201,7 @@ public final class DashClient {
                 //System.out.println("Delivering chunk Num: " + i);
             }
 
-            q = 3; //default quality
+            //q = 3; //default quality
             //start to download rest of chunks and deliver
             System.out.println("size to delivery: " + chunkNum);
             for (int i = deliverLists.size(); i < chunkNum; i++) {
