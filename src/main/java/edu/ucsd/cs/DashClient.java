@@ -190,12 +190,12 @@ public final class DashClient {
 
             for(int i = 0; i < deliverLists.size(); i++) {
                 target.deliver(i, q, deliverLists.get(i));
-                System.out.println("Delivering chunk Num: " + i);
+                //System.out.println("Delivering chunk Num: " + i);
             }
 
             q = 3; //default quality
             //start to download rest of chunks and deliver
-            System.out.println("size to delivery: " + deliverLists.size());
+            System.out.println("size to delivery: " + chunkNum);
             for (int i = deliverLists.size(); i < chunkNum; i++) {
                 // Step 3a: Choose a quality level for chunk i
                 //q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
