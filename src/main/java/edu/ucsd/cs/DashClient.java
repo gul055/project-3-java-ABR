@@ -239,7 +239,7 @@ public final class DashClient {
                     } else {
                         q = 1;
                     }
-                } else if (durationInMs <= 2000 && totalBufferTime >= 2000) {
+                } else if (durationInMs <= 2000 && totalBufferTime >= 6000) {
                     if (q < 5) {
                         q += 1;
                     }
