@@ -103,7 +103,7 @@ public final class DashClient {
                 bandwidthTable.add(bw);
 
                 NodeList segmentlists = rNode.getChildNodes();
-                segList.clear();
+                segList = new ArrayList<>();
                 for (int i = 0; i < segmentlists.getLength(); i++) {
                     Node segmentlist = segmentlists.item(i);
 
