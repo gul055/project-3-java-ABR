@@ -217,6 +217,7 @@ public final class DashClient {
                 // buffering events if happened, how many chunks need to be rebufferred?
                 target.deliver(i, q, chunk.contents);
                 totalBufferTime = totalBufferTime - durationInMs + 2000;
+                System.out.println("totalBufferTime: " + totalBufferTime + " durationInMs: " + durationInMs);
                 if (durationInMs > 2000 && totalBufferTime < 2000) {
                     if (q > 1) {
                         q -= 1;
