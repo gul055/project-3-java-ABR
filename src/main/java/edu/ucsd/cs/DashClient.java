@@ -126,15 +126,15 @@ public final class DashClient {
             
             Collections.sort(bandwidthTable);
             for (int i = 0; i < bandwidthTable.size(); i++) {
-                System.out.println("quality: " + i+1 + "bandwidth: " + bandwidthTable.get(i));
+                System.out.println("quality: " + (i+1) + "bandwidth: " + bandwidthTable.get(i));
             }
 
             // Step 3: For a movie with C chunks, download chunks 1, 2, ... up to C at a given quality level
-            int q = 0; // default quality
+            int q = 1; // default quality
             ArrayList<String> seglists = new ArrayList<>();
 
-            if (segTable.containsKey(bandwidthTable.get(q))) {
-                seglists = segTable.get(bandwidthTable.get(q));
+            if (segTable.containsKey(bandwidthTable.get(q-1))) {
+                seglists = segTable.get(bandwidthTable.get(q-1));
                 chunkNum = seglists.size(); // get the actual number from the mpd file
                 videoLength = 2000 * chunkNum; //in milliseconds
                 initialBufferTime = videoLength * 0.15; //can be changed
@@ -182,11 +182,11 @@ public final class DashClient {
             //start to download rest of chunks and deliver
             for (int i = deliverLists.size(); i < chunkNum; i++) {
                 // Step 3a: Choose a quality level for chunk i
-                q = 2;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
+                q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
                 //depend on bandwidth???
 
                 // Step 3b: Download chunk i at quality level q
-                int quality = bandwidthTable.get(q);
+                int quality = bandwidthTable.get(q-1);
                 System.out.println("I am trying to download chunk");
                 //need to parse?
                 chunkurl = new URL(segTable.get(quality).get(i));
