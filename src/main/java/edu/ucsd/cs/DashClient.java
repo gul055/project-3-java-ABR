@@ -184,7 +184,7 @@ public final class DashClient {
                 System.out.println("chunkSize: " + chunkSize + " durationInMs: " + durationInMs + " currBandWidth: " + currBandWidth 
                 + " sumBandWidth " + sumBandWidth);
                 bufferTimeLen = initialBufferTime - durationInMs;
-                if (bufferTimeLen/initialBufferTime >= 0.8) {
+                if (bufferTimeLen/initialBufferTime >= 0.9) {
                     if (q < 5) {
                         q += 1;
                     }
