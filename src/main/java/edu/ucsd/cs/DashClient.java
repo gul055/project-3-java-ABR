@@ -41,6 +41,7 @@ public final class DashClient {
     private long eTime;
     private long totalBufferTime;
     private DownloadedFile chunk;
+    private double bufferTimeLen;
 
     private long durationInMs;
     private long chunkSize;
@@ -146,6 +147,7 @@ public final class DashClient {
                 chunkNum = seglists.size(); // get the actual number from the mpd file
                 videoLength = 2000 * chunkNum; //in milliseconds
                 initialBufferTime = videoLength * 0.15; //can be changed
+                bufferTimeLen = videoLength * 0.05;
 
                 System.out.println("chunkNum: " + chunkNum + " videoLength: " + videoLength + " initialBufferTime: " + initialBufferTime);
             } else {
@@ -162,7 +164,7 @@ public final class DashClient {
 
             //first few segs
             for (int i = 0; i < chunkNum; i++) {
-                if (initialBufferTime < 2000) {
+                if (initialBufferTime < 2000 || totalBufferTime >= 6000) {
                     break;
                 }
                 chunkurl = new URL(seglists.get(i));
@@ -182,7 +184,7 @@ public final class DashClient {
                 System.out.println("chunkSize: " + chunkSize + " durationInMs: " + durationInMs + " currBandWidth: " + currBandWidth 
                 + " sumBandWidth " + sumBandWidth);
                 initialBufferTime -= durationInMs;
-                totalBufferTime += durationInMs;
+                totalBufferTime += 2000;
                 System.out.println("initialBufferTime: " + initialBufferTime);
             }
 
