@@ -47,8 +47,8 @@ public final class DashClient {
     private long currBandWidth;
     
     
-    private Hashtable<Integer, ArrayList<String>> segTable= new Hashtable<>();
-    private ArrayList<Integer> bandwidthTable = new ArrayList<>();
+    private Hashtable<String, ArrayList<String>> segTable= new Hashtable<>();
+    private ArrayList<String> bandwidthTable = new ArrayList<>();
     private ArrayList<byte[]> deliverLists = new ArrayList<>();
 
     public DashClient(File bwspec, String transcript) {
@@ -100,7 +100,7 @@ public final class DashClient {
                 String bw = new String(representation.getAttribute("bandwidth"));
                 //System.out.println("Representation " + repnum + " Bandwidth: " + bw);
 
-                bandwidthTable.add(Integer.parseInt(bw));
+                bandwidthTable.add(bw);
 
                 NodeList segmentlists = rNode.getChildNodes();
                 segList.clear();
@@ -127,7 +127,7 @@ public final class DashClient {
                         }
                     }
                 }
-                segTable.put(Integer.parseInt(bw), segList);
+                segTable.put(bw, segList);
             }
             
             Collections.sort(bandwidthTable);
@@ -200,12 +200,12 @@ public final class DashClient {
                 //depend on bandwidth???
 
                 // Step 3b: Download chunk i at quality level q
-                int quality = bandwidthTable.get(q-1);
+                String quality = bandwidthTable.get(q-1);
                 System.out.println("I am trying to download chunk: " + i + " with quality: " + q + " bandwidth: " + quality);
                 //need to parse?
                 chunkurl = new URL(segTable.get(quality).get(i));
                 System.out.println("ulr: " + chunkurl.toString());
-                
+
                 sTime = System.nanoTime();
                 chunk = httpclient.slowGetURL(chunkurl);
                 eTime = System.nanoTime();
