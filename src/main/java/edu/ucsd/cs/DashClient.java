@@ -147,7 +147,6 @@ public final class DashClient {
                 chunkNum = seglists.size(); // get the actual number from the mpd file
                 videoLength = 2000 * chunkNum; //in milliseconds
                 initialBufferTime = videoLength * 0.18; //can be changed
-                bufferTimeLen = videoLength * 0.05;
 
                 System.out.println("chunkNum: " + chunkNum + " videoLength: " + videoLength + " initialBufferTime: " + initialBufferTime);
             } else {
@@ -156,7 +155,6 @@ public final class DashClient {
             }
                 
             initialBufferTime -= durationInMs; //mpd download time
-            totalBufferTime += durationInMs;
 
             //Time to first frame
             //no sure if I need more chunk to determine bandwidth
@@ -167,11 +165,6 @@ public final class DashClient {
                 if (initialBufferTime < 2000) {
                     break;
                 }
-		if ( i > 3 ) {
-			if (q < 5) {
-				q += 1;
-			}
-		}
                 chunkurl = new URL(segTable.get(bandwidthTable.get(q-1)).get(i));
                 System.out.println("ulr: " + chunkurl.toString());
 
@@ -188,7 +181,13 @@ public final class DashClient {
                 sumBandWidth += currBandWidth;
                 System.out.println("chunkSize: " + chunkSize + " durationInMs: " + durationInMs + " currBandWidth: " + currBandWidth 
                 + " sumBandWidth " + sumBandWidth);
-                initialBufferTime -= durationInMs;
+                bufferTimeLen = initialBufferTime - durationInMs;
+                if (bufferTimeLen/initialBufferTime >= 0.8) {
+                    if (q < 5) {
+                        q += 1;
+                    }
+                }
+                initialBufferTime = bufferTimeLen;
                 totalBufferTime += 2000;
                 System.out.println("initialBufferTime: " + initialBufferTime);
             }
@@ -238,7 +237,7 @@ public final class DashClient {
                     } else {
                         q = 1;
                     }
-                } else if (durationInMs <= 2000) {
+                } else if (durationInMs <= 2000 && totalBufferTime >= 2000) {
                     if (q < 5) {
                         q += 1;
                     }
