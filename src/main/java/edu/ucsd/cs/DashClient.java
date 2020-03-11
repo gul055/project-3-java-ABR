@@ -130,7 +130,7 @@ public final class DashClient {
                 segTable.put(bw, segList);
             }
 
-            System.out.println(segTable.toString());
+            //System.out.println(segTable.toString());
             //Collections.sort(bandwidthTable);
             for (int i = 0; i < bandwidthTable.size(); i++) {
                 System.out.println("quality: " + (i+1) + " bandwidth: " + bandwidthTable.get(i));
@@ -193,8 +193,9 @@ public final class DashClient {
                 System.out.println("Delivering chunk Num: " + i);
             }
 
-            q = 1; //default quality
+            q = 3; //default quality
             //start to download rest of chunks and deliver
+            System.out.println("size to delivery: " + deliverLists.size());
             for (int i = deliverLists.size(); i < chunkNum-1; i++) {
                 // Step 3a: Choose a quality level for chunk i
                 //q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
