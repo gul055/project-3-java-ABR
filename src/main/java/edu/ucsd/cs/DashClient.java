@@ -78,7 +78,8 @@ public final class DashClient {
             // Step 2: Parse the spec and pull out the URLs for each chunk at the 5 quality levels
             // How to do this was covered during the Feb 24th TA section
 
-	        InputStream stream = new ByteArrayInputStream(spec.getBytes(StandardCharsets.UTF_8));
+
+	    InputStream stream = new ByteArrayInputStream(spec.getBytes(StandardCharsets.UTF_8));
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(stream);
@@ -137,7 +138,7 @@ public final class DashClient {
             }
 
             // Step 3: For a movie with C chunks, download chunks 1, 2, ... up to C at a given quality level
-            int q = 1; // default quality
+            int q = 3; // default quality
             ArrayList<String> seglists = new ArrayList<>();
 
             if (segTable.containsKey(bandwidthTable.get(q-1))) {
