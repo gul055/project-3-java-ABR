@@ -163,7 +163,7 @@ public final class DashClient {
 
                 durationInMs = TimeUnit.NANOSECONDS.toMillis(eTime - sTime);
 
-                chunkSize = chunk.contents.length;
+                chunkSize = chunk.contents.length * 8;
                 currBandWidth = chunkSize/durationInMs;
                 sumBandWidth += currBandWidth;
                 System.out.println("chunkSize: " + chunkSize + " durationInMs: " + durationInMs + " currBandWidth: " + currBandWidth 
@@ -172,7 +172,7 @@ public final class DashClient {
                 System.out.println("initialBufferTime: " + initialBufferTime);
             }
 
-            double estBandWidth = sumBandWidth / deliverLists.size();
+            long estBandWidth = Math.round(sumBandWidth / deliverLists.size());
             System.out.println("estBandWidth: " + estBandWidth);
 
             for(int i = 0; i < deliverLists.size(); i++) {
