@@ -39,7 +39,7 @@ public final class DashClient {
     private URL chunkurl;
     private long sTime;
     private long eTime;
-    private double totalBufferTime;
+    private long totalBufferTime;
     private DownloadedFile chunk;
     private double bufferTimeLen;
 
@@ -184,7 +184,7 @@ public final class DashClient {
                 System.out.println("chunkSize: " + chunkSize + " durationInMs: " + durationInMs + " currBandWidth: " + currBandWidth 
                 + " sumBandWidth " + sumBandWidth);
                 bufferTimeLen = initialBufferTime - durationInMs;
-                if (bufferTimeLen/initialBufferTime >= 0.9) {
+                if (bufferTimeLen/initialBufferTime >= 0.85) {
                     if (q < 5) {
                         q += 1;
                     }
@@ -204,7 +204,6 @@ public final class DashClient {
 
             //q = 3; //default quality
             //start to download rest of chunks and deliver
-            bufferTimeLen = totalBufferTime;
             System.out.println("size to delivery: " + chunkNum);
             for (int i = deliverLists.size(); i < chunkNum; i++) {
                 // Step 3a: Choose a quality level for chunk i
@@ -232,16 +231,15 @@ public final class DashClient {
                 // Note you might want to buffer the first few chunks to prevent
                 // buffering events if happened, how many chunks need to be rebufferred?
                 target.deliver(i, q, chunk.contents);
-                bufferTimeLen = (totalBufferTime - durationInMs + 2000) / totalBufferTime;
                 totalBufferTime = totalBufferTime - durationInMs + 2000;
                 System.out.println("totalBufferTime: " + totalBufferTime + " durationInMs: " + durationInMs);
-                if (durationInMs > 2000 && bufferTimeLen < 0.8) {
+                if (durationInMs > 2000 && totalBufferTime < 6000) {
                     if (q > 1) {
                         q -= 1;
                     } else {
                         q = 1;
                     }
-                } else if (durationInMs <= 2000 && bufferTimeLen >= 0.8) {
+                } else if (durationInMs <= 2000 && totalBufferTime >= 6000) {
                     if (q < 5) {
                         q += 1;
                     }
