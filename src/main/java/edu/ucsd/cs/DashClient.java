@@ -177,7 +177,9 @@ public final class DashClient {
                 durationInMs = TimeUnit.NANOSECONDS.toMillis(eTime - sTime);
 
                 chunkSize = chunk.contents.length * 8;
+                if (durationInMs > 0) {
                 currBandWidth = chunkSize/durationInMs;
+                }
                 sumBandWidth += currBandWidth;
                 System.out.println("chunkSize: " + chunkSize + " durationInMs: " + durationInMs + " currBandWidth: " + currBandWidth 
                 + " sumBandWidth " + sumBandWidth);
