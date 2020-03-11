@@ -164,6 +164,8 @@ public final class DashClient {
                     break;
                 }
                 chunkurl = new URL(seglists.get(i));
+                System.out.println("ulr: " + chunkurl.toString());
+
                 sTime = System.nanoTime();
                 chunk = httpclient.slowGetURL(chunkurl);
                 eTime = System.nanoTime();
@@ -199,10 +201,11 @@ public final class DashClient {
 
                 // Step 3b: Download chunk i at quality level q
                 int quality = bandwidthTable.get(q-1);
-                System.out.println("I am trying to download chunk: " + i + " with quality: " + q);
+                System.out.println("I am trying to download chunk: " + i + " with quality: " + q + " bandwidth: " + quality);
                 //need to parse?
                 chunkurl = new URL(segTable.get(quality).get(i));
                 System.out.println("ulr: " + chunkurl.toString());
+                
                 sTime = System.nanoTime();
                 chunk = httpclient.slowGetURL(chunkurl);
                 eTime = System.nanoTime();
