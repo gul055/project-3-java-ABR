@@ -63,7 +63,7 @@ public final class DashClient {
             // step 1: Download the mpd spec file
             URL urlLink = new URL(mpdurl);
             String urlLinkString = urlLink.toString();
-            urlLinkString = urlLinkString.substring(0, urlLinkString.lastIndexOf('/'));
+            urlLinkString = urlLinkString.substring(0, urlLinkString.lastIndexOf('/')+1);
             System.out.println("urlLinkString: " + urlLinkString);
 
             DownloadedFile specfile = httpclient.slowGetURL(urlLink);
@@ -130,7 +130,7 @@ public final class DashClient {
             }
 
             // Step 3: For a movie with C chunks, download chunks 1, 2, ... up to C at a given quality level
-            int q = 1; // default quality
+            int q = 0; // default quality
             ArrayList<String> seglists = new ArrayList<>();
 
             if (segTable.containsKey(bandwidthTable.get(q))) {
@@ -182,7 +182,7 @@ public final class DashClient {
             //start to download rest of chunks and deliver
             for (int i = deliverLists.size(); i < chunkNum; i++) {
                 // Step 3a: Choose a quality level for chunk i
-                q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
+                q = 2;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
                 //depend on bandwidth???
 
                 // Step 3b: Download chunk i at quality level q
