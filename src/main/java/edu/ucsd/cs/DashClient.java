@@ -160,7 +160,7 @@ public final class DashClient {
             //no sure how many chunks need to download in rebuffering events
 
             //first few segs
-            for (int i = 0; i <= chunkNum; i++) {
+            for (int i = 0; i < chunkNum-1; i++) {
                 if (initialBufferTime < 2000) {
                     break;
                 }
