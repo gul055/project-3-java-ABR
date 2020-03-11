@@ -206,7 +206,7 @@ public final class DashClient {
                 chunk = httpclient.slowGetURL(chunkurl);
                 eTime = System.nanoTime();
 
-                durationInMs = TimeUnit.NANOSECONDS.toSeconds(eTime - sTime);
+                durationInMs = TimeUnit.NANOSECONDS.toMillis(eTime - sTime);
                 chunkSize = chunk.contents.length;
                 currBandWidth = chunkSize/durationInMs;
                 System.out.println("currBandWidth: " + currBandWidth);
