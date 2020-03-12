@@ -81,7 +81,7 @@ public final class DashClient {
             // How to do this was covered during the Feb 24th TA section
 
 
-	    InputStream stream = new ByteArrayInputStream(spec.getBytes(StandardCharsets.UTF_8));
+	        InputStream stream = new ByteArrayInputStream(spec.getBytes(StandardCharsets.UTF_8));
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(stream);
@@ -91,7 +91,7 @@ public final class DashClient {
 
             NodeList repList = doc.getElementsByTagName("Representation");
 
-            ArrayList<String> segList = new ArrayList<>();
+            ArrayList<String> segList = new ArrayList<>(); //create a list storing segs
 
             for (int repnum = 0; repnum < repList.getLength(); repnum++) {
 
@@ -103,7 +103,7 @@ public final class DashClient {
                 String bw = new String(representation.getAttribute("bandwidth"));
                 //System.out.println("Representation " + repnum + " Bandwidth: " + bw);
 
-                bandwidthTable.add(Integer.parseInt(bw));
+                bandwidthTable.add(Integer.parseInt(bw)); //bandwidth as a key
 
                 NodeList segmentlists = rNode.getChildNodes();
                 segList = new ArrayList<>();
@@ -134,10 +134,10 @@ public final class DashClient {
             }
 
             //System.out.println(segTable.toString());
-            Collections.sort(bandwidthTable);
-            for (int i = 0; i < bandwidthTable.size(); i++) {
+            Collections.sort(bandwidthTable); //sort the bandwidth from low to high in order to get the quality number
+            /*for (int i = 0; i < bandwidthTable.size(); i++) {
                 System.out.println("quality: " + (i+1) + " bandwidth: " + bandwidthTable.get(i));
-            }
+            }*/
 
             // Step 3: For a movie with C chunks, download chunks 1, 2, ... up to C at a given quality level
             int q = 1; // default quality
@@ -149,7 +149,7 @@ public final class DashClient {
                 videoLength = 2000 * (chunkNum-1); //in milliseconds
                 initialBufferTime = videoLength * 0.18; //can be changed
 
-                System.out.println("chunkNum: " + chunkNum + " videoLength: " + videoLength + " initialBufferTime: " + initialBufferTime);
+                //System.out.println("chunkNum: " + chunkNum + " videoLength: " + videoLength + " initialBufferTime: " + initialBufferTime);
             } else {
                 System.err.println("There is no segments in default quality!");
                 System.exit(1);
@@ -163,50 +163,57 @@ public final class DashClient {
 
             //first few segs
             for (int i = 0; i < chunkNum; i++) {
+                //check if its above the 20% time of initial buffer
                 if (initialBufferTime < 2000) {
                     break;
                 }
                 chunkurl = new URL(segTable.get(bandwidthTable.get(q-1)).get(i));
-                System.out.println("ulr: " + chunkurl.toString());
+                //System.out.println("ulr: " + chunkurl.toString());
 
                 sTime = System.nanoTime();
                 chunk = httpclient.slowGetURL(chunkurl);
                 eTime = System.nanoTime();
 
-                deliverLists.add(chunk.contents);
-                bufferQualitylist.add(q);
+                deliverLists.add(chunk.contents); //place the chunk and ready to delivery
+                bufferQualitylist.add(q); //place the current quality for delivery use
 
                 durationInMs = TimeUnit.NANOSECONDS.toMillis(eTime - sTime);
-
-                chunkSize = chunk.contents.length * 8;
+                
+                /*
+                chunkSize = chunk.contents.length * 8; //not gonna use, probably...just for testing
                 if (durationInMs > 0) {
                 currBandWidth = chunkSize/durationInMs;
                 }
                 sumBandWidth += currBandWidth;
                 System.out.println("chunkSize: " + chunkSize + " durationInMs: " + durationInMs + " currBandWidth: " + currBandWidth 
-                + " sumBandWidth " + sumBandWidth);
-                bufferTimeLen = initialBufferTime - durationInMs;
+                + " sumBandWidth " + sumBandWidth); */
+
+                bufferTimeLen = initialBufferTime - durationInMs; //calculate the ratio changed
+
+                // if bandwidth is stable or bandwidth is really big, we want to increase the quality of initial chunks
                 if (bufferTimeLen/initialBufferTime >= 0.85) {
                     if (q < 5) {
                         q += 1;
                     }
                 }
                 initialBufferTime = bufferTimeLen;
-                totalBufferTime += 2000;
-                System.out.println("initialBufferTime: " + initialBufferTime);
+                totalBufferTime += 2000; //that is the time we can have in advance
+                //System.out.println("initialBufferTime: " + initialBufferTime);
             }
 
+            //just for testing
+            /*
             long estBandWidth = Math.round(sumBandWidth / deliverLists.size());
             System.out.println("estBandWidth: " + estBandWidth);
+            */
 
             for(int i = 0; i < deliverLists.size(); i++) {
                 target.deliver(i, bufferQualitylist.get(i), deliverLists.get(i));
                 //System.out.println("Delivering chunk Num: " + i);
             }
 
-            //q = 3; //default quality
             //start to download rest of chunks and deliver
-            System.out.println("size to delivery: " + chunkNum);
+
             for (int i = deliverLists.size(); i < chunkNum; i++) {
                 // Step 3a: Choose a quality level for chunk i
                 //q = 3;   // q can be {1, 2, 3, 4, 5} based on your ABR algorithm
@@ -214,27 +221,33 @@ public final class DashClient {
 
                 // Step 3b: Download chunk i at quality level q
                 int quality = bandwidthTable.get(q-1);
-                System.out.println("I am trying to download chunk: " + i + " with quality: " + q + " bandwidth: " + quality);
+                //System.out.println("I am trying to download chunk: " + i + " with quality: " + q + " bandwidth: " + quality);
                 //need to parse?
                 chunkurl = new URL(segTable.get(quality).get(i));
-                System.out.println("ulr: " + chunkurl.toString());
+                //System.out.println("ulr: " + chunkurl.toString());
 
                 sTime = System.nanoTime();
                 chunk = httpclient.slowGetURL(chunkurl);
                 eTime = System.nanoTime();
 
                 durationInMs = TimeUnit.NANOSECONDS.toMillis(eTime - sTime);
+
+                /*
                 chunkSize = chunk.contents.length;
                 currBandWidth = chunkSize/durationInMs;
-                System.out.println("currBandWidth: " + currBandWidth);
+                System.out.println("currBandWidth: " + currBandWidth);*/
 
 
                 // Step 3b: Deliver the chunk to the logger module
                 // Note you might want to buffer the first few chunks to prevent
                 // buffering events if happened, how many chunks need to be rebufferred?
                 target.deliver(i, q, chunk.contents);
+
+                //sent out 2sec video, but we need to minus the download time, which remain the buffertime we had.
                 totalBufferTime = totalBufferTime - durationInMs + 2000;
-                System.out.println("totalBufferTime: " + totalBufferTime + " durationInMs: " + durationInMs);
+                //System.out.println("totalBufferTime: " + totalBufferTime + " durationInMs: " + durationInMs);
+
+                //we want to change the quality due to the download time and the buffer time we left, 6000 is a good number :>
                 if (durationInMs > 2000 && totalBufferTime < 6000) {
                     if (q > 1) {
                         q -= 1;

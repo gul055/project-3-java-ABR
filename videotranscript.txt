@@ -1,4 +1,4 @@
-Wed Mar 11 23:49:03 PDT 2020,53,Starting VideoTarget
-Wed Mar 11 23:49:03 PDT 2020,65,chunk_num: 1,chunk_quality: 5,chunk_len: 4096,chunk_hash: 723f9db93ce5df5fc5e3a1e151e94a53284df20caa740bd8bd3e0f976e100348
-Wed Mar 11 23:49:04 PDT 2020,1570,chunk_num: 2,chunk_quality: 3,chunk_len: 4096,chunk_hash: 870fb2d3e7c9a8308b8cf0cac80423235c6060abe14e7e224ac4c829627dc058
-Wed Mar 11 23:49:06 PDT 2020,3872,chunk_num: 3,chunk_quality: 3,chunk_len: 4096,chunk_hash: 6b1703b9b2561e16f33f3344ff99afd127586550e11b8b23cbb875ce6d085c8a
+Thu Mar 12 00:44:58 PDT 2020,62,Starting VideoTarget
+Thu Mar 12 00:44:58 PDT 2020,69,chunk_num: 1,chunk_quality: 5,chunk_len: 4096,chunk_hash: 990b3c3406956f6c500f9b08effd16e28aa7086ddd82cc150258a8f18c7a8e4b
+Thu Mar 12 00:45:00 PDT 2020,1575,chunk_num: 2,chunk_quality: 3,chunk_len: 4096,chunk_hash: aed271acaac40b615e21a7dea29f8023263d618061de48a9a6adc0e7618cff0f
+Thu Mar 12 00:45:02 PDT 2020,3877,chunk_num: 3,chunk_quality: 3,chunk_len: 4096,chunk_hash: 557503df9fcf5f82aa879fcec13d8126822fe27d8c6e67750d52c20da2d2b97c
