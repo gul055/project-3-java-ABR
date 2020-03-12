@@ -50,6 +50,7 @@ public final class DashClient {
     
     private Hashtable<Integer, ArrayList<String>> segTable= new Hashtable<>();
     private ArrayList<Integer> bandwidthTable = new ArrayList<>();
+    private ArrayList<Integer> bufferQualitylist = new ArrayList<>();
     private ArrayList<byte[]> deliverLists = new ArrayList<>();
 
     public DashClient(File bwspec, String transcript) {
@@ -145,7 +146,7 @@ public final class DashClient {
             if (segTable.containsKey(bandwidthTable.get(q-1))) {
                 seglists = segTable.get(bandwidthTable.get(q-1));
                 chunkNum = seglists.size(); // get the actual number from the mpd file
-                videoLength = 2000 * chunkNum; //in milliseconds
+                videoLength = 2000 * (chunkNum-1); //in milliseconds
                 initialBufferTime = videoLength * 0.18; //can be changed
 
                 System.out.println("chunkNum: " + chunkNum + " videoLength: " + videoLength + " initialBufferTime: " + initialBufferTime);
@@ -173,6 +174,7 @@ public final class DashClient {
                 eTime = System.nanoTime();
 
                 deliverLists.add(chunk.contents);
+                bufferQualitylist.add(q);
 
                 durationInMs = TimeUnit.NANOSECONDS.toMillis(eTime - sTime);
 
@@ -198,7 +200,7 @@ public final class DashClient {
             System.out.println("estBandWidth: " + estBandWidth);
 
             for(int i = 0; i < deliverLists.size(); i++) {
-                target.deliver(i, q, deliverLists.get(i));
+                target.deliver(i, bufferQualitylist.get(i), deliverLists.get(i));
                 //System.out.println("Delivering chunk Num: " + i);
             }
 
